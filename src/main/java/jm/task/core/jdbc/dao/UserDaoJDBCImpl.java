@@ -1,6 +1,8 @@
 package jm.task.core.jdbc.dao;
+
 import jm.task.core.jdbc.model.User;
 import jm.task.core.jdbc.util.Util;
+
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -13,9 +15,11 @@ public class UserDaoJDBCImpl implements UserDao {
     private static final String INSERT_USER = "INSERT INTO Task_1_1_3_4.Users (name, lastname, age) VALUES (?,?,?)";
     private static final String AVAILABILITAY_USER = "SELECT ID FROM Task_1_1_3_4.Users WHERE id = ?";
     private static final String REMOVE_USER = "DELETE FROM Task_1_1_3_4.Users WHERE id = ?";
+
     public UserDaoJDBCImpl() {
 
     }
+
     Connection connect;
 
     {
@@ -28,19 +32,19 @@ public class UserDaoJDBCImpl implements UserDao {
 
     public void createUsersTable() {
         try (Statement statement = connect.createStatement()) {
-                statement.executeUpdate("CREATE SCHEMA IF NOT EXISTS Task_1_1_3_4");
-                statement.executeUpdate("CREATE table IF NOT EXISTS Task_1_1_3_4.Users (id BIGINT not null auto_increment, " +
-                        "name varchar(45) not null, lastName varchar(45) not null, age int not null, PRIMARY KEY (id))");
-            }
-        catch (SQLException e) {
+            statement.executeUpdate("CREATE SCHEMA IF NOT EXISTS Task_1_1_3_4");
+            statement.executeUpdate("CREATE table IF NOT EXISTS Task_1_1_3_4.Users (id BIGINT not null auto_increment," +
+                    "name varchar(45) not null, lastName varchar(45) not null, age int not null, PRIMARY KEY (id))");
+        } catch (SQLException e) {
             throw new RuntimeException(e);
         }
     }
 
     public void dropUsersTable() {
         try (Statement statement = connect.createStatement()) {
-                statement.executeUpdate("DROP table IF EXISTS Task_1_1_3_4.Users");
-                statement.executeUpdate("DROP SCHEMA IF EXISTS Task_1_1_3_4");
+            statement.executeUpdate("DROP table IF EXISTS Task_1_1_3_4.Users");
+            statement.executeUpdate("DROP SCHEMA IF EXISTS Task_1_1_3_4");
+            System.out.println("Таблица удалена");
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
@@ -52,7 +56,7 @@ public class UserDaoJDBCImpl implements UserDao {
             preparedstatement.setString(2, lastName);
             preparedstatement.setInt(3, age);
             preparedstatement.executeUpdate();
-            System.out.println("User с именем " + lastName + " " + name + " добавлен в таблицу");
+            System.out.println("User с именем " + lastName + " " + name + " добавлен в базу данных");
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
@@ -68,7 +72,7 @@ public class UserDaoJDBCImpl implements UserDao {
                 preparedstatement = connect.prepareStatement(REMOVE_USER);
                 preparedstatement.setLong(1, id);
                 preparedstatement.executeUpdate();
-                System.out.println("User с номером id " + id + " удален из таблицы");
+                System.out.println("User с номером id " + id + " удален из базы данных");
             } else {
                 System.out.println("В таблице нет записи под номером " + id);
             }
@@ -77,10 +81,10 @@ public class UserDaoJDBCImpl implements UserDao {
         } finally {
             try {
                 if (preparedstatement != null) {
-                        preparedstatement.close();
+                    preparedstatement.close();
                 }
             } catch (SQLException e) {
-                    throw new RuntimeException(e);
+                throw new RuntimeException(e);
             }
         }
     }
@@ -90,12 +94,16 @@ public class UserDaoJDBCImpl implements UserDao {
         try (Statement statement = connect.createStatement()) {
             ResultSet rs = statement.executeQuery("SELECT * FROM Task_1_1_3_4.Users");
             while (rs.next()) {
+                Long id = rs.getLong("id");
                 String name = rs.getString("name");
                 String lastName = rs.getString("lastName");
                 byte age = (byte) rs.getInt("age");
-                users.add(new User(name, lastName, age));
+                users.add(new User(id, name, lastName, age));
             }
-            System.out.println("Список Users получен");
+            System.out.println("Список оставшихся Users в базе данных:");
+            for (User user : users) {
+                System.out.println(user);
+            }
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
